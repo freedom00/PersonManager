@@ -54,27 +54,22 @@ namespace PersonManager.Controllers
         }
 
         // POST: People/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,IdCardNum,IdCardImg")] PersonViewModel personViewModel)
+        public async Task<IActionResult> Create([Bind("Person,IdCardImg")] PersonViewModel personViewModel)
         {
             if (ModelState.IsValid)
             {
-                var filePath = Path.Combine(configuration.GetValue<string>("StoredFilesPath"), Path.GetRandomFileName() + Path.GetExtension(personViewModel.IdCardImg.FileName));
+                var filePath = string.Format("{0}/{1}", configuration.GetValue<string>("StoredFilesPath"), Path.GetRandomFileName() + Path.GetExtension(personViewModel.IdCardImg.FileName));
                 using (var fileStream = System.IO.File.Create(filePath))
                 {
                     await personViewModel.IdCardImg.CopyToAsync(fileStream);
                 }
-                var person = new Person()
-                {
-                    Name = personViewModel.Name,
-                    IdCardNum = personViewModel.IdCardNum,
-                    IdCardImgUrl = filePath.Substring(8)
-                };
-                _context.Add(person);
+                personViewModel.Person.IdCardImgUrl = filePath.Substring(7);
+
+                _context.Add(personViewModel.Person);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
             return View(personViewModel);
@@ -93,7 +88,11 @@ namespace PersonManager.Controllers
             {
                 return NotFound();
             }
-            return View(person);
+            var personViewModel = new PersonViewModel()
+            {
+                Person = person
+            };
+            return View(personViewModel);
         }
 
         // POST: People/Edit/5

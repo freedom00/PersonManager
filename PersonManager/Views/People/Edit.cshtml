@@ -1,4 +1,6 @@
-﻿@model PersonManager.Models.Person
+﻿@using System.IO;
+
+@model PersonManager.Models.PersonViewModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -10,24 +12,25 @@
 <h4>Person</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-5">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="PersonId" />
+            <input type="hidden" asp-for="Person.PersonId" />
             <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+                <label asp-for="Person.Name" class="control-label"></label>
+                <input asp-for="Person.Name" class="form-control" />
+                <span asp-validation-for="Person.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="IdCardNum" class="control-label"></label>
-                <input asp-for="IdCardNum" class="form-control" />
-                <span asp-validation-for="IdCardNum" class="text-danger"></span>
+                <label asp-for="Person.IdCardNum" class="control-label"></label>
+                <input asp-for="Person.IdCardNum" class="form-control" />
+                <span asp-validation-for="Person.IdCardNum" class="text-danger"></span>
             </div>
+            <input type="hidden" asp-for="Person.IdCardImgUrl" id="inputImageUrl" />
             <div class="form-group">
-                <label asp-for="IdCardImgUrl" class="control-label"></label>
-                <input asp-for="IdCardImgUrl" class="form-control" />
-                <span asp-validation-for="IdCardImgUrl" class="text-danger"></span>
+                <label asp-for="IdCardImg" class="control-label"></label>
+                <input asp-for="IdCardImg" class="file" id="inputImage" />
+                <span asp-validation-for="IdCardImg" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
@@ -39,6 +42,33 @@
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
+
+<script>
+    window.onload = function () {
+        $("#inputImage").fileinput({
+            initialPreviewAsData: true,
+            fileActionSettings: {
+                zoomIcon: '<i class="fas fa-search-plus"></i>',
+                removeIcon: '<i class="fa fa-trash"></i>',
+            },
+            previewZoomButtonIcons: {
+                prev: '<i class="fas fa-caret-left"></i>',
+                next: '<i class="fas fa-caret-right"></i>',
+                toggleheader: '<i class="fas fa-arrows-alt-v"></i>',
+                fullscreen: '<i class="fas fa-arrows-alt"></i>',
+                borderless: '<i class="fas fa-expand-alt"></i>',
+                close: '<i class="fas fa-times"></i>'
+            },
+
+            initialPreview: [
+                "@Model.Person.IdCardImgUrl"
+            ],
+                        initialPreviewConfig: [
+                { caption: "@System.IO.Path.GetFileName(Model.Person.IdCardImgUrl)" }
+            ]
+        });
+    }
+</script>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

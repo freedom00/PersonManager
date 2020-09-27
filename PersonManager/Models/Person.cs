@@ -19,7 +19,6 @@ namespace PersonManager.Models
         [RegularExpression(@"^(\d{15}$|^\d{18}$|^\d{17}(\d|X|x))$", ErrorMessage = "ID card number invalid")]
         public string IdCardNum { get; set; }
 
-        [Required]
         [Display(Name = "ID Card Url")]
         public string IdCardImgUrl { get; set; }
     }
