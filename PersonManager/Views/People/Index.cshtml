@@ -1,0 +1,50 @@
+﻿@model IEnumerable<PersonManager.Models.Person>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdCardNum)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.IdCardImgUrl)
+            </th>
+            <th>ID Card Image</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IdCardNum)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IdCardImgUrl)
+            </td>
+            <td><img width="88" height="88" src="@item.IdCardImgUrl" /></td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.PersonId">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.PersonId">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.PersonId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
