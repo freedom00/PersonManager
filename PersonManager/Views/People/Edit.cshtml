@@ -46,8 +46,13 @@
 <script>
     window.onload = function () {
         $("#inputImage").fileinput({
+            allowedFileExtensions: ['jpg', 'png', 'gif'],
+            browseIcon: '<i class="fas fa-folder-open"></i>',
+            removeIcon: '<i class="fas fa-trash"></i>',
             initialPreviewAsData: true,
+            showUpload: false,
             fileActionSettings: {
+                showRemove: false,
                 zoomIcon: '<i class="fas fa-search-plus"></i>',
                 removeIcon: '<i class="fa fa-trash"></i>',
             },
@@ -63,7 +68,7 @@
             initialPreview: [
                 "@Model.Person.IdCardImgUrl"
             ],
-                        initialPreviewConfig: [
+            initialPreviewConfig: [
                 { caption: "@System.IO.Path.GetFileName(Model.Person.IdCardImgUrl)" }
             ]
         });

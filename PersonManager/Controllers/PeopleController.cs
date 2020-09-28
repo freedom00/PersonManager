@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using PersonManager.Data;
 using PersonManager.Models;
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace PersonManager.Controllers
 {
@@ -17,10 +16,15 @@ namespace PersonManager.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration configuration;
 
-        public PeopleController(ApplicationDbContext context, IConfiguration configuration)
+        [Obsolete]
+        private readonly IHostingEnvironment hostingEnvironment;
+
+        [Obsolete]
+        public PeopleController(ApplicationDbContext context, IConfiguration configuration, IHostingEnvironment hostingEnvironment)
         {
             _context = context;
             this.configuration = configuration;
+            this.hostingEnvironment = hostingEnvironment;
         }
 
         // GET: People
@@ -56,16 +60,19 @@ namespace PersonManager.Controllers
         // POST: People/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Obsolete]
         public async Task<IActionResult> Create([Bind("Person,IdCardImg")] PersonViewModel personViewModel)
         {
             if (ModelState.IsValid)
             {
                 var filePath = string.Format("{0}/{1}", configuration.GetValue<string>("StoredFilesPath"), Path.GetRandomFileName() + Path.GetExtension(personViewModel.IdCardImg.FileName));
-                using (var fileStream = System.IO.File.Create(filePath))
+                //var currentPath = Directory.GetCurrentDirectory();
+                var webrootPath = hostingEnvironment.WebRootPath;
+                using (var fileStream = System.IO.File.Create(webrootPath + filePath))
                 {
                     await personViewModel.IdCardImg.CopyToAsync(fileStream);
                 }
-                personViewModel.Person.IdCardImgUrl = filePath.Substring(7);
+                personViewModel.Person.IdCardImgUrl = filePath;
 
                 _context.Add(personViewModel.Person);
                 await _context.SaveChangesAsync();
@@ -96,8 +103,6 @@ namespace PersonManager.Controllers
         }
 
         // POST: People/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("PersonId,Name,IdCardNum,IdCardImgUrl")] Person person)
@@ -151,11 +156,22 @@ namespace PersonManager.Controllers
         // POST: People/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Obsolete]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var person = await _context.Person.FindAsync(id);
+
+            var filePath = person.IdCardImgUrl;
+            var webrootPath = hostingEnvironment.WebRootPath;
+            var fullPath = webrootPath + filePath;
+
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
             _context.Person.Remove(person);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 

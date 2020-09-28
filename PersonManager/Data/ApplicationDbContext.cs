@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using PersonManager.Models;
 
 namespace PersonManager.Data
 {
@@ -10,6 +9,7 @@ namespace PersonManager.Data
             : base(options)
         {
         }
+
         public DbSet<PersonManager.Models.Person> Person { get; set; }
     }
 }
