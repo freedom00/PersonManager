@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using System;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PersonManager.Migrations
 {
@@ -54,7 +54,7 @@ namespace PersonManager.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(nullable: false),
                     IdCardNum = table.Column<string>(nullable: false),
-                    IdCardImgUrl = table.Column<string>(nullable: false)
+                    IdCardImgUrl = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {

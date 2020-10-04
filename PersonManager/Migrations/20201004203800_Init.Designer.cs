@@ -10,7 +10,7 @@ using PersonManager.Data;
 namespace PersonManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20200926210905_Init")]
+    [Migration("20201004203800_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -229,7 +229,6 @@ namespace PersonManager.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("IdCardImgUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IdCardNum")

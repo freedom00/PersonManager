@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -61,18 +62,17 @@ namespace PersonManager.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Obsolete]
-        public async Task<IActionResult> Create([Bind("Person,IdCardImg")] PersonViewModel personViewModel)
+        public async Task<IActionResult> Create([Bind("Person,File")] PersonViewModel personViewModel)
         {
             if (ModelState.IsValid)
             {
-                var filePath = string.Format("{0}/{1}", configuration.GetValue<string>("StoredFilesPath"), Path.GetRandomFileName() + Path.GetExtension(personViewModel.IdCardImg.FileName));
-                //var currentPath = Directory.GetCurrentDirectory();
-                var webrootPath = hostingEnvironment.WebRootPath;
-                using (var fileStream = System.IO.File.Create(webrootPath + filePath))
+                if (null != personViewModel.File)
                 {
-                    await personViewModel.IdCardImg.CopyToAsync(fileStream);
+                    var relativePath = GetRelativePath(personViewModel.File.Image.FileName);
+                    await CreateAsync(personViewModel.File.Image, GetAbsolutePath(relativePath));
+
+                    personViewModel.Person.IdCardImgUrl = relativePath;
                 }
-                personViewModel.Person.IdCardImgUrl = filePath;
 
                 _context.Add(personViewModel.Person);
                 await _context.SaveChangesAsync();
@@ -105,9 +105,10 @@ namespace PersonManager.Controllers
         // POST: People/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PersonId,Name,IdCardNum,IdCardImgUrl")] Person person)
+        [Obsolete]
+        public async Task<IActionResult> Edit(int id, [Bind("Person,File")] PersonViewModel personViewModel)
         {
-            if (id != person.PersonId)
+            if (id != personViewModel.Person.PersonId)
             {
                 return NotFound();
             }
@@ -116,12 +117,22 @@ namespace PersonManager.Controllers
             {
                 try
                 {
-                    _context.Update(person);
+                    if (null != personViewModel.File)
+                    {
+                        Delete(GetAbsolutePath(personViewModel.Person.IdCardImgUrl));
+
+                        var relativePath = GetRelativePath(personViewModel.File.Image.FileName);
+                        await CreateAsync(personViewModel.File.Image, GetAbsolutePath(relativePath));
+
+                        personViewModel.Person.IdCardImgUrl = relativePath;
+                    }
+
+                    _context.Update(personViewModel.Person);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PersonExists(person.PersonId))
+                    if (!PersonExists(personViewModel.Person.PersonId))
                     {
                         return NotFound();
                     }
@@ -132,7 +143,7 @@ namespace PersonManager.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(person);
+            return View(personViewModel);
         }
 
         // GET: People/Delete/5
@@ -143,8 +154,7 @@ namespace PersonManager.Controllers
                 return NotFound();
             }
 
-            var person = await _context.Person
-                .FirstOrDefaultAsync(m => m.PersonId == id);
+            var person = await _context.Person.FirstOrDefaultAsync(m => m.PersonId == id);
             if (person == null)
             {
                 return NotFound();
@@ -161,14 +171,8 @@ namespace PersonManager.Controllers
         {
             var person = await _context.Person.FindAsync(id);
 
-            var filePath = person.IdCardImgUrl;
-            var webrootPath = hostingEnvironment.WebRootPath;
-            var fullPath = webrootPath + filePath;
+            Delete(GetAbsolutePath(person.IdCardImgUrl));
 
-            if (System.IO.File.Exists(fullPath))
-            {
-                System.IO.File.Delete(fullPath);
-            }
             _context.Person.Remove(person);
             await _context.SaveChangesAsync();
 
@@ -178,6 +182,27 @@ namespace PersonManager.Controllers
         private bool PersonExists(int id)
         {
             return _context.Person.Any(e => e.PersonId == id);
+        }
+
+        private string GetRelativePath(string fileName) => string.Format("{0}/{1}", configuration.GetValue<string>("StoredFilesPath"), Path.GetRandomFileName() + Path.GetExtension(fileName));
+
+        [Obsolete]
+        private string GetAbsolutePath(string relativePath) => hostingEnvironment.WebRootPath + relativePath;
+
+        private void Delete(string path)
+        {
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
+        }
+
+        private async Task CreateAsync(IFormFile formFile, string path)
+        {
+            using (var fileStream = System.IO.File.Create(path))
+            {
+                await formFile.CopyToAsync(fileStream);
+            }
         }
     }
 }

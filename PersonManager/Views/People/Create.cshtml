@@ -10,7 +10,7 @@
 <h4>Person</h4>
 <hr />
 <div class="row">
-    <div class="col-md-12">
+    <div class="col-md-5">
         <form asp-action="Create" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
@@ -24,9 +24,9 @@
                 <span asp-validation-for="Person.IdCardNum" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="IdCardImg" class="control-label"></label>
-                <input asp-for="IdCardImg" class="file" id="inputImage" />
-                <span asp-validation-for="IdCardImg" class="text-danger"></span>
+                <label asp-for="File.Image" class="control-label"></label>
+                <input asp-for="File.Image" class="file" id="inputImage" />
+                <span asp-validation-for="File.Image" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
